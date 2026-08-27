@@ -9,6 +9,12 @@
 /sys/class/qns(/.*)?                                                                    u:object_r:qns_sysfs:s0
 
 # Data files
+/custom(/.*)?                         u:object_r:system_file:s0
+/nvcfg(/.*)?                          u:object_r:system_file:s0
+/nvdata(/.*)?                         u:object_r:system_file:s0
+/persist(/.*)?                        u:object_r:system_file:s0
+/protect_f(/.*)?                      u:object_r:system_file:s0
+/protect_s(/.*)?                      u:object_r:system_file:s0
 /idd                                  u:object_r:idd_root_dir:s0
 /idd(/.*)?                            u:object_r:idd_data_file:s0
 /idd/lost\+found(/.*)?                u:object_r:idd_lostfound_file:s0

@@ -13,8 +13,8 @@ on init
 on post-fs-data
     start ta_ccci_service
 
-service tad_static /sbin/tad_static /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/ta 0,16
+service tad_static /vendor/bin/tad_static /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/ta 0,16
     user system
     group system root
-    socket tad stream 0770 system trimarea
+    socket tad stream 0770 system vendor_trimarea
     class trimarea

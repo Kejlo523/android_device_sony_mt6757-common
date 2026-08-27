@@ -59,4 +59,23 @@ setup_vendor "$DEVICE" "$VENDOR" "$LINEAGE_ROOT" false "$CLEAN_VENDOR"
 
 extract "$MY_DIR"/proprietary-files.txt "$SRC" "$SECTION"
 
+# Android 10 no longer supports Beam/P2P, and the Oreo discovery mask includes
+# legacy technologies that make the PN553 HAL wait forever on hinoki.
+NFC_CONFIG="$LINEAGE_ROOT"/vendor/$VENDOR/$DEVICE/proprietary/vendor/etc/libnfc-brcm.conf
+sed -i \
+    -e 's/^POLLING_TECH_MASK=.*/POLLING_TECH_MASK=0x01/' \
+    -e 's/^P2P_LISTEN_TECH_MASK=.*/P2P_LISTEN_TECH_MASK=0x00/' \
+    "$NFC_CONFIG"
+
+# The Oreo MTK HWC aborts instead of cleaning up stale acquire/release/retire
+# fences under Android 10. This is reproducible with virtual displays.
+python3 "$MY_DIR"/patches/patch-hwc-retire-fence.py \
+    "$LINEAGE_ROOT"/vendor/$VENDOR/$DEVICE/proprietary/vendor/lib64/hw/hwcomposer.mt6757.so
+
+# Do not advertise Oreo video decoder blobs whose Vcodec userspace ABI is
+# incompatible with Android 10. Google's software codecs provide the formats
+# used by current applications without crashing the OMX service.
+OMX_CONFIG="$LINEAGE_ROOT"/vendor/$VENDOR/$DEVICE/proprietary/vendor/etc/mtk_omx_core.cfg
+sed -i '/^OMX\.MTK\.VIDEO\.DECODER\./d' "$OMX_CONFIG"
+
 "$MY_DIR"/setup-makefiles.sh

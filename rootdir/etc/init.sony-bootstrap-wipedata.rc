@@ -5,6 +5,6 @@
 
 on init
     wait /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/userdata
-    exec u:r:recovery:s0 root root cache system trimarea graphics -- /sbin/wipedata check-full-wipe
-    exec u:r:installd:s0 root root cache system trimarea graphics -- /sbin/wipedata check-keep-media-wipe
-    exec u:r:recovery:s0 root root cache system trimarea graphics -- /sbin/wipedata check-umount
+    exec u:r:recovery:s0 root root cache system vendor_trimarea graphics -- /sbin/wipedata check-full-wipe
+    exec u:r:installd:s0 root root cache system vendor_trimarea graphics -- /sbin/wipedata check-keep-media-wipe
+    exec u:r:recovery:s0 root root cache system vendor_trimarea graphics -- /sbin/wipedata check-umount

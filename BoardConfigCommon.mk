@@ -32,7 +32,7 @@ TARGET_CPU_ABI2 :=
 TARGET_CPU_VARIANT := cortex-a53
 
 TARGET_2ND_ARCH := arm
-TARGET_2ND_ARCH_VARIANT := armv7-a-neon
+TARGET_2ND_ARCH_VARIANT := armv8-a
 TARGET_2ND_CPU_ABI := armeabi-v7a
 TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := cortex-a53
@@ -53,7 +53,6 @@ BACKLIGHT_PATH := /sys/class/leds/lcd-backlight/brightness
 
 # Dexpreopt
 WITH_DEXPREOPT := true
-DONT_DEXPREOPT_PREBUILTS := true
 
 # Display
 USE_OPENGL_RENDERER:=true
@@ -83,8 +82,9 @@ BOARD_USE_SOFT_GATEKEEPER := true
 BOARD_GPS_LIBRARIES := true
 BOARD_CONNECTIVITY_MODULE := conn_soc
 
-# Headers
-TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
+# Do not globally shadow Android 10 platform headers with Oreo headers.
+# Device-specific compatibility headers are added only to modules that need
+# them; a global override breaks current audio_stream_in definitions.
 
 # HIDL Manifest
 DEVICE_MANIFEST_FILE := $(COMMON_PATH)/manifest.xml
@@ -100,7 +100,11 @@ BOARD_TAGS_OFFSET := 0x03f88000
 BOARD_SECOND_OFFSET := 0x00e88000
 BOARD_KERNEL_OFFSET = 0x00008000
 TARGET_KERNEL_ARCH := arm64
-BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 androidboot.selinux=permissive
+# The current compatibility policy is permissive.  Without audit=0, every
+# legacy Mali/HWC ioctl is logged and keeps logd/auditd and the CPUs busy even
+# while the phone is idle.  Re-enable auditing when the policy is ready for an
+# enforcing build.
+BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 androidboot.selinux=permissive audit=0 skip_initramfs root=/dev/mmcblk0p39 rootwait ro init=/init
 BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET) --ramdisk_offset $(BOARD_RAMDISK_OFFSET) --second_offset $(BOARD_SECOND_OFFSET) --tags_offset $(BOARD_TAGS_OFFSET)
 TARGET_USES_64_BIT_BINDER := true
 
@@ -121,6 +125,7 @@ BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_CACHEIMAGE_PARTITION_SIZE := 209715200
 BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 5788139520
+BOARD_BUILD_SYSTEM_ROOT_IMAGE := true
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 24536678400
 BOARD_FLASH_BLOCK_SIZE := 131072
@@ -130,6 +135,10 @@ TARGET_RECOVERY_FSTAB := $(COMMON_PATH)/rootdir/etc/recovery.fstab
 
 # RIL
 BOARD_PROVIDES_LIBRIL := true
+# Sony's MTK stack is split between mtkrild and mtk-rilproxy. Building the
+# platform rild as well starts a second copy of mtk-ril.so before the modem
+# mux is ready and registers duplicate Radio HAL services.
+ENABLE_VENDOR_RIL_SERVICE := true
 
 # Sensors
 TARGET_NO_SENSOR_PERMISSION_CHECK := true
@@ -158,7 +167,20 @@ TARGET_LD_SHIM_LIBS := \
 	/system/lib/libaalservice.so|libshim_fake_log_print.so \
 	/system/lib64/libaalservice.so|libshim_fake_log_print.so \
 	/system/lib/libaal.so|libshim_fake_log_print.so \
-	/system/lib64/libaal.so|libshim_fake_log_print.so
+	/system/lib64/libaal.so|libshim_fake_log_print.so \
+	/vendor/lib/hw/android.hardware.sensors@1.0-impl-mediatek.so|libshim_sensor_log_message.so \
+	/vendor/lib64/hw/android.hardware.sensors@1.0-impl-mediatek.so|libshim_sensor_log_message.so \
+	/vendor/lib/vendor.mediatek.hardware.audio@2.1_vendor.so|libshim_sensor_log_message.so \
+	/vendor/lib/hw/vendor.mediatek.hardware.bluetooth@1.1-impl.so|libshim_sensor_log_message.so \
+	/vendor/lib64/hw/vendor.mediatek.hardware.bluetooth@1.1-impl.so|libshim_sensor_log_message.so \
+	/vendor/lib/libnvram.so|libshim_sensor_log_message.so \
+	/vendor/lib64/libnvram.so|libshim_sensor_log_message.so \
+	/vendor/lib/egl/libGLES_mali.so|libutilscallstack.so \
+	/vendor/lib64/egl/libGLES_mali.so|libutilscallstack.so \
+	/vendor/lib/libion_ulit.so|libutilscallstack.so \
+	/vendor/lib64/libion_ulit.so|libutilscallstack.so \
+	/vendor/lib/hw/hwcomposer.mt6757.so|libutilscallstack.so \
+	/vendor/lib64/hw/hwcomposer.mt6757.so|libutilscallstack.so
 
 # FS Gen
 TARGET_FS_CONFIG_GEN := \

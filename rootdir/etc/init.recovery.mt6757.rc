@@ -1,3 +1,8 @@
+on init
+    # Legacy flashable ZIPs such as BiTGApps still use #!/sbin/sh.
+    mkdir /sbin 0755 root root
+    symlink /system/bin/sh /sbin/sh
+
 on fs
     # Set charging free due to it waits for USB activation
 	write /sys/class/android_usb/android0/enable 1

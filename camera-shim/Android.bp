@@ -1,0 +1,8 @@
+cc_library_shared {
+    name: "libcamera_legacy_ui_shim",
+    vendor: true,
+    compile_multilib: "32",
+    srcs: ["LegacyUiShim.cpp"],
+    shared_libs: ["libui"],
+    cflags: ["-Wall", "-Werror"],
+}

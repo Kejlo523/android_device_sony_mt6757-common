@@ -112,6 +112,7 @@ Only the three quirks included above are recognized at this point:
     </Encoders>
     <Decoders>
         <!-- MTK codec -->
+        <!-- Disabled: the Oreo MTK Vcodec ABI is not usable on Android 10.
         <MediaCodec name="OMX.MTK.VIDEO.DECODER.MPEG4" type="video/mp4v-es" update="true">
             <Limit name="measured-frame-rate-176x144" range="626-1377" />
             <Limit name="measured-frame-rate-480x360" range="317-698" />
@@ -139,12 +140,7 @@ Only the three quirks included above are recognized at this point:
             <Limit name="measured-frame-rate-1280x720" range="35-77" />
             <Limit name="measured-frame-rate-1920x1080" range="15-32" />
         </MediaCodec>
-        <MediaCodec name="OMX.MTK.VIDEO.DECODER.VP9" type="video/x-vnd.on2.vp9" update="true">
-            <Limit name="measured-frame-rate-320x180" range="355-780" />
-            <Limit name="measured-frame-rate-640x360" range="235-517" />
-            <Limit name="measured-frame-rate-1280x720" range="106-234" />
-            <Limit name="measured-frame-rate-1920x1080" range="77-169" />
-        </MediaCodec>
+        -->
         <!-- Google codec -->
         <MediaCodec name="OMX.google.mpeg4.decoder" type="video/mp4v-es" update="true">
             <Limit name="measured-frame-rate-176x144" range="386-849" />

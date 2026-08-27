@@ -70,8 +70,6 @@ on property:sys.usb.config=adb && property:sys.usb.acm_enable=1
     start adbd
     setprop sys.usb.state ${sys.usb.config}
 on property:sys.usb.config=adb && property:sys.usb.acm_enable=0
-    setprop persist.sys.usb.config mtp,adb
-    setprop sys.usb.config mtp,adb
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
 	write /sys/class/android_usb/android0/idProduct ${sys.usb.pid}

@@ -1,4 +1,5 @@
-#/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/system /system ext4 ro wait
+# bootbridge mounts the system-as-root partition before handing control to init.
+# A second first-stage mount here makes init abort on the XA1 boot chain.
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/userdata /data ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,resize,encryptable=/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/metadata
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/cache /cache ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check
 
@@ -17,7 +18,7 @@
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/lk2 /bootloader2 emmc defaults defaults
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/para /misc emmc defaults defaults
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/boot /boot emmc defaults defaults
-/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/recovery /recovery emmc defaults defaults
+/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/fotakernel /recovery emmc defaults defaults
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/logo /logo emmc defaults defaults
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/expdb /expdb emmc defaults defaults
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/seccfg /seccfg emmc defaults defaults

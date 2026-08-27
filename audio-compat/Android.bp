@@ -1,0 +1,21 @@
+// Keep the exact Audio HAL 2.0 client used by the validated G3112 image.
+// Rebuilding this legacy client after the Oreo header cleanup produces a
+// slightly different binary, while the stock MTK audio service is still 2.0.
+cc_prebuilt_library_shared {
+    name: "libaudiohal@2.0",
+    owner: "sony",
+    compile_multilib: "both",
+    multilib: {
+        lib32: {
+            srcs: ["lib/libaudiohal@2.0.so"],
+        },
+        lib64: {
+            srcs: ["lib64/libaudiohal@2.0.so"],
+        },
+    },
+    prefer: true,
+    strip: {
+        none: true,
+    },
+    check_elf_files: false,
+}

@@ -4,4 +4,4 @@
 #
 
 on init
-    exec u:r:recovery:s0 root root cache system trimarea graphics -- /sbin/mr
+    exec u:r:recovery:s0 root root cache system vendor_trimarea graphics -- /sbin/mr

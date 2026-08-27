@@ -15,7 +15,57 @@ import init.sony-enterprise.rc
 import init.sony-drm.rc
 import ${ro.mtkrc.path}init.modem.rc
 
+# The hinoki Android 10 system is entered through bootbridge with /system and
+# /data already mounted.  fs_mgr therefore does not emit the normal
+# nonencrypted trigger which starts the main and late_start service classes.
+# Queue a separate event here.  Init runs it only after every post-fs-data
+# action has finished, including the vendor setup of /nvdata and /data/nvram.
+on post-fs-data
+    # Keep an early userspace log on cache so boot failures remain readable
+    # from recovery even when adbd never becomes available.
+    start hinoki_bootlog
+
+    # bootbridge bypasses the normal userdata preparation path. Create only
+    # the lower sdcardfs roots here; sdcardfs supplies the per-app view and
+    # permissions for everything below them.
+    mkdir /data/media 0770 media_rw media_rw
+    chown media_rw media_rw /data/media
+    chmod 0770 /data/media
+    mkdir /data/media/0 0770 media_rw media_rw
+    chown media_rw media_rw /data/media/0
+    chmod 0770 /data/media/0
+    restorecon_recursive /data/media
+
+    trigger hinoki-framework-start
+
+on property:sys.boot_completed=1
+    stop hinoki_bootlog
+
+on hinoki-framework-start
+    start nvram_daemon
+    # The stock NVRAM daemon does not publish its completion property when
+    # started through bootbridge.  Legacy audio blocks forever waiting for it.
+    setprop service.nvram_init Ready
+    class_start main
+    class_start late_start
+
+service hinoki_bootlog /system/bin/logcat -b all -v threadtime -f /cache/hinoki-boot.log
+    class core
+    user root
+    group root system log readproc
+    disabled
+
+# The legacy Sony/MTK HAL opens the speaker PCM route but does not enable the
+# two final amplifier controls on Android 10. Enable them after audio startup.
+on property:sys.boot_completed=1
+    exec - root audio -- /system/bin/tinymix 3 On
+    exec - root audio -- /system/bin/tinymix 11 On
+
 on early-init
+    # bootbridge mounts userdata itself, so fs_mgr never publishes this.
+    # Publish it before class services can start; NVRAM chooses its path once.
+    setprop ro.crypto.state unencrypted
+
 	# CPU
     write /proc/ppm/policy/userlimit_min_cpu_freq "1 1794000"
     write /proc/ppm/policy/userlimit_min_cpu_core "1 1"
@@ -84,21 +134,21 @@ on charger
     mount ext4 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/cache /cache rw wait
     wait /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/Qnovo
     mount ext4 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/Qnovo /qns nosuid nodev noatime noexec barrier=0 discard
-    chown qns qns /qns
+    chown vendor_qns vendor_qns /qns
     chmod 0750 /qns
     restorecon_recursive /qns
-    chown qns qns /sys/class/qns
-    chown qns qns /sys/class/qns/alarm
-    chown qns qns /sys/class/qns/battery_type
-    chown qns qns /sys/class/qns/charge_current
-    chown qns qns /sys/class/qns/charging_state
-    chown qns qns /sys/class/qns/current_now
-    chown qns qns /sys/class/qns/design
-    chown qns qns /sys/class/qns/fcc
-    chown qns qns /sys/class/qns/options
-    chown qns qns /sys/class/qns/soc
-    chown qns qns /sys/class/qns/temp
-    chown qns qns /sys/class/qns/voltage
+    chown vendor_qns vendor_qns /sys/class/qns
+    chown vendor_qns vendor_qns /sys/class/qns/alarm
+    chown vendor_qns vendor_qns /sys/class/qns/battery_type
+    chown vendor_qns vendor_qns /sys/class/qns/charge_current
+    chown vendor_qns vendor_qns /sys/class/qns/charging_state
+    chown vendor_qns vendor_qns /sys/class/qns/current_now
+    chown vendor_qns vendor_qns /sys/class/qns/design
+    chown vendor_qns vendor_qns /sys/class/qns/fcc
+    chown vendor_qns vendor_qns /sys/class/qns/options
+    chown vendor_qns vendor_qns /sys/class/qns/soc
+    chown vendor_qns vendor_qns /sys/class/qns/temp
+    chown vendor_qns vendor_qns /sys/class/qns/voltage
     start qns
     chmod 0660 /dev/spm
     chown system system /dev/spm
@@ -127,15 +177,15 @@ on property:persist.service.battery.smt_chg=charging_resume
 on fs
     write /proc/bootprof "INIT:Mount_START"
     write /sys/kernel/debug/tracing/trace_marker "B|1|Mount"
-    mount_all /vendor/etc/fstab.mt6757
+    mount_all /fstab.mt6757
     exec /system/bin/tune2fs -O has_journal -u 10010 -r 4096 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/userdata
     write /sys/kernel/debug/tracing/trace_marker "E"
     write /proc/bootprof "INIT:Mount_END"
     write /proc/bootprof "INIT:Mount Qnovo image START"
-    mkdir /qns 0750 qns qns
+    mkdir /qns 0750 vendor_qns vendor_qns
     wait /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/Qnovo
     mount ext4 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/Qnovo /qns nosuid nodev noatime noexec barrier=0 discard
-    chown qns qns /qns
+    chown vendor_qns vendor_qns /qns
     chmod 0750 /qns
     restorecon_recursive /qns
     write /proc/bootprof "INIT:Mount Qnovo image END"
@@ -360,7 +410,7 @@ on post-fs-data
     chown root radio /sys/devices/platform/Accdet_Driver/driver/accdet_call_state
 
     # VideoCodec
-    mknod /dev/Vcodec c 160 0
+    exec - root root -- /system/bin/mknod /dev/Vcodec c 160 0
     chmod 0660 /dev/Vcodec
     chown media system /dev/Vcodec
 
@@ -483,12 +533,12 @@ on post-fs-data
     chown root system /dev/sec
 
     # FM Radio device node
-    mknod /dev/fm     c 193 0;
+    exec - root root -- /system/bin/mknod /dev/fm c 193 0
     chmod 0660 /dev/fm
     chown media media /dev/fm
 
     # Device info /proc interface
-    mknod /dev/devmap c 196 0;
+    exec - root root -- /system/bin/mknod /dev/devmap c 196 0
     chmod 0440 /dev/devmap
     chown root system /dev/devmap
 
@@ -595,8 +645,8 @@ on post-fs-data
     chmod 0640 /mtd@bootimg
     chown root system /mtd@bootimg
 
-    chmod 0640 /mtd@recovery
-    chown root system /mtd@recovery
+    chmod 0640 /mtd@fotakernel
+    chown root system /mtd@fotakernel
 
     chmod 0660 /mtd@nvram
     chown root system /mtd@nvram

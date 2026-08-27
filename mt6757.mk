@@ -25,6 +25,26 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 # Vendor
 $(call inherit-product-if-exists, vendor/sony/mt6757-common/mt6757-common-vendor.mk)
 
+# Sony's Oreo MTK radio HAL needs the VNDK 27 radio ABI.  Keep it under a
+# private SONAME so the Android 10 framework continues using its native copy.
+PRODUCT_COPY_FILES += \
+    prebuilts/vndk/v27/arm/arch-arm-armv7-a-neon/shared/vndk-core/android.hardware.radio@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/android.hardware.radi0@1.0.so \
+    prebuilts/vndk/v27/arm64/arch-arm64-armv8-a/shared/vndk-core/android.hardware.radio@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.radi0@1.0.so \
+    $(COMMON_PATH)/ril-compat/libbind3r.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libbind3r.so \
+    $(COMMON_PATH)/ril-compat/libutilz.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libutilz.so \
+    prebuilts/vndk/v27/arm64/arch-arm64-armv8-a/shared/vndk-sp/libcutils.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libcutilz.so \
+    prebuilts/vndk/v27/arm64/arch-arm64-armv8-a/shared/vndk-sp/libbase.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libbas3.so
+
+# The XA1 boots the system partition directly as a read-only root. Keep these
+# directories in system.img so fs_mgr can mount the device-specific partitions.
+PRODUCT_COPY_FILES += \
+    $(COMMON_PATH)/rootdir/mountpoint.marker:root/nvdata/.mountpoint \
+    $(COMMON_PATH)/rootdir/mountpoint.marker:root/nvcfg/.mountpoint \
+    $(COMMON_PATH)/rootdir/mountpoint.marker:root/persist/.mountpoint \
+    $(COMMON_PATH)/rootdir/mountpoint.marker:root/protect_f/.mountpoint \
+    $(COMMON_PATH)/rootdir/mountpoint.marker:root/protect_s/.mountpoint \
+    $(COMMON_PATH)/rootdir/mountpoint.marker:root/custom/.mountpoint
+
 # Overlays
 DEVICE_PACKAGE_OVERLAYS += \
     $(COMMON_PATH)/overlay \
@@ -36,6 +56,7 @@ PRODUCT_AAPT_PREF_CONFIG := xxhdpi
 
 # Audio
 PRODUCT_PACKAGES += \
+    libsensorndkbridge \
     android.hardware.audio@2.0-impl \
     android.hardware.audio@2.0-service \
     android.hardware.audio.effect@2.0-impl \
@@ -60,6 +81,7 @@ PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/configs/audio/audio_em.xml:system/vendor/etc/audio_em.xml \
     $(COMMON_PATH)/configs/audio/audio_policy.conf:system/vendor/etc/audio_policy.conf \
     $(COMMON_PATH)/configs/audio/audio_policy_configuration.xml:system/vendor/etc/audio_policy_configuration.xml \
+    $(COMMON_PATH)/configs/audio/audio_policy_configuration.xml:system/odm/etc/audio_policy_configuration.xml \
     $(COMMON_PATH)/configs/audio/audio_policy_volumes.xml:system/vendor/etc/audio_policy_volumes.xml \
     $(COMMON_PATH)/configs/audio/default_volume_tables.xml:system/vendor/etc/default_volume_tables.xml \
     $(COMMON_PATH)/configs/audio/r_submix_audio_policy_configuration.xml:system/vendor/etc/r_submix_audio_policy_configuration.xml \
@@ -76,7 +98,20 @@ PRODUCT_PACKAGES += \
     android.hardware.camera.provider@2.4-service \
     android.hardware.camera.device@3.2-impl \
     android.hardware.camera.device@3.2-service \
+    libcamera_legacy_ui_shim \
     Snap
+
+PRODUCT_COPY_FILES += \
+    $(COMMON_PATH)/camera-compat/libhidltransp0rt.so:$(TARGET_COPY_OUT_VENDOR)/lib/libhidltransp0rt.so \
+    $(COMMON_PATH)/camera-compat/libbaze.so:$(TARGET_COPY_OUT_VENDOR)/lib/libbaze.so \
+    $(COMMON_PATH)/camera-compat/android.hardware.sensorz@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/android.hardware.sensorz@1.0.so \
+    $(COMMON_PATH)/camera-compat/android.hardware.camera.devic3@3.2.so:$(TARGET_COPY_OUT_VENDOR)/lib/android.hardware.camera.devic3@3.2.so
+
+# The legacy MTK media stack is not compatible with Android 10 Codec2. Apart
+# from breaking audio playback, a stuck Codec2 Vorbis decoder prevents
+# SoundPool from shutting down and freezes every app switching camera modes.
+PRODUCT_PROPERTY_OVERRIDES += \
+    debug.stagefright.ccodec=0
 
 # Configstore
 PRODUCT_PACKAGES += \
@@ -124,13 +159,20 @@ PRODUCT_COPY_FILES += \
 
 # Media
 PRODUCT_COPY_FILES += \
+    prebuilts/vndk/v27/arm64/arch-arm-armv7-a-neon/shared/vndk-core/libui.so:$(TARGET_COPY_OUT_VENDOR)/lib/libu8.so \
+    prebuilts/vndk/v27/arm64/arch-arm64-armv8-a/shared/vndk-core/libui.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libu8.so \
+    vendor/sony/mt6757-common/proprietary/vendor/lib/libaudiocompensationfilter.so:system/lib/libaudiocompensationfilter.so \
+    vendor/sony/mt6757-common/proprietary/vendor/lib/libaudiocompensationfilterc.so:system/lib/libaudiocompensationfilterc.so \
+    vendor/sony/mt6757-common/proprietary/vendor/lib/libaudiocomponentengine.so:system/lib/libaudiocomponentengine.so \
+    vendor/sony/mt6757-common/proprietary/vendor/lib/libaudiocomponentenginec.so:system/lib/libaudiocomponentenginec.so \
     $(COMMON_PATH)/configs/media/media_codecs.xml:system/vendor/etc/media_codecs.xml \
     $(COMMON_PATH)/configs/media/media_codecs_google_audio.xml:system/vendor/etc/media_codecs_google_audio.xml \
     $(COMMON_PATH)/configs/media/media_codecs_google_video_le.xml:system/vendor/etc/media_codecs_google_video_le.xml \
     $(COMMON_PATH)/configs/media/media_codecs_mediatek_audio.xml:system/vendor/etc/media_codecs_mediatek_audio.xml \
     $(COMMON_PATH)/configs/media/media_codecs_mediatek_video.xml:system/vendor/etc/media_codecs_mediatek_video.xml \
     $(COMMON_PATH)/configs/media/media_codecs_performance.xml:system/vendor/etc/media_codecs_performance.xml \
-    $(COMMON_PATH)/configs/media/media_profiles.xml:system/vendor/etc/media_profiles.xml
+    $(COMMON_PATH)/configs/media/media_profiles.xml:system/vendor/etc/media_profiles.xml \
+    $(COMMON_PATH)/configs/media/media_profiles_V1_0.xml:system/vendor/etc/media_profiles_V1_0.xml
 
 # Memtrack
 PRODUCT_PACKAGES += \
@@ -144,34 +186,48 @@ PRODUCT_PACKAGES += \
 
 # MTKRC
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
-    ro.mtkrc.path=/vendor/etc/init/hw/
+    ro.mtkrc.path=/vendor/etc/init/hw/ \
+    ro.adb.secure=0
 
 # Net
 PRODUCT_PACKAGES += \
     netutils-wrapper-1.0
 
-# NFC
+# Use one NFC HAL owner only. The AOSP HIDL wrapper works with Sony's legacy
+# nfc_nci module; the parallel NXP extension races it for the controller.
 PRODUCT_PACKAGES += \
     android.hardware.nfc@1.0 \
     android.hardware.nfc@1.0-impl \
+    android.hardware.nfc@1.0-service \
     com.android.nfc_extras \
     NfcNci \
     Tag
 
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.hardware.nfc.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.nfc.xml \
+    $(COMMON_PATH)/configs/nfc/libnfc-nci.conf:$(TARGET_COPY_OUT_VENDOR)/etc/libnfc-nci.conf
+
 # OMX
 PRODUCT_PACKAGES += \
-    android.hardware.media.omx@1.0-service
+    android.hardware.media.omx@1.0-service \
+    libstagefrighthw
 
 # Shim Libraries
 PRODUCT_PACKAGES += \
+    libandroid_net \
+    libshim_agps_ssl \
+    libshim_atcid_radio \
+    libshim_mnld_mutex \
     libshim_program_binary \
-    libshim_fake_log_print
+    libshim_fake_log_print \
+    libshim_sensor_log_message
 
 # Permissions
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.audio.low_latency.xml:system/vendor/etc/permissions/android.hardware.audio.low_latency.xml \
     frameworks/native/data/etc/android.hardware.bluetooth.xml:system/vendor/etc/permissions/android.hardware.bluetooth.xml \
     frameworks/native/data/etc/android.hardware.bluetooth_le.xml:system/vendor/etc/permissions/android.hardware.bluetooth_le.xml \
+    frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:system/vendor/etc/permissions/android.hardware.camera.flash-autofocus.xml \
     frameworks/native/data/etc/android.hardware.faketouch.xml:system/vendor/etc/permissions/android.hardware.faketouch.xml \
     frameworks/native/data/etc/android.hardware.location.gps.xml:system/vendor/etc/permissions/android.hardware.location.gps.xml \
     frameworks/native/data/etc/android.hardware.opengles.aep.xml:system/vendor/etc/permissions/android.hardware.opengles.aep.xml \
@@ -217,11 +273,20 @@ PRODUCT_PACKAGES += \
     android.hardware.renderscript@1.0-impl
 
 # RIL
-PRODUCT_PACKAGES+= \
+PRODUCT_PACKAGES += \
     android.hardware.radio@1.0 \
     android.hardware.radio.deprecated@1.0
 
-PRODUCT_BOOT_JARS += \
+# Register the MTK-only radio callback channel used for incoming call
+# pre-alerts (RIL_UNSOL_INCOMING_CALL_INDICATION / +EAIC).
+PRODUCT_PACKAGES += \
+    HinokiRadioBridge \
+    mediatek-telephony-common.xml
+
+# Android 10 no longer accepts these Oreo-era dex-only prebuilts on the
+# platform boot class path. Keep them installed while the framework shims
+# are ported to proper Soong java_import modules.
+PRODUCT_PACKAGES += \
     ModemSwitcher \
     com.sonyericsson.idd_impl \
     com.sonymobile.miscta_impl \
@@ -247,6 +312,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     fstab.enableswap \
     fstab.mt6757 \
+    fstab.mt6757.root \
     init.connectivity.rc \
     init.modem.rc \
     init.mt6757.rc \
@@ -262,14 +328,14 @@ PRODUCT_PACKAGES += \
     init.sony-enterprise.rc \
     init.sony-fota.rc \
     init.sony-trimarea.rc \
-    ueventd_mt6757.rc
+    ueventd.mt6757.rc
 
 PRODUCT_COPY_FILES += \
     $(COMMON_PATH)/rootdir/sbin/checkfirstboot:root/sbin/checkfirstboot \
     $(COMMON_PATH)/rootdir/sbin/fota-ua:root/sbin/fota-ua \
     $(COMMON_PATH)/rootdir/sbin/fuelgauged_static:root/sbin/fuelgauged_static \
     $(COMMON_PATH)/rootdir/sbin/mr:root/sbin/mr \
-    $(COMMON_PATH)/rootdir/sbin/tad_static:root/sbin/tad_static \
+    $(COMMON_PATH)/rootdir/sbin/tad_static:$(TARGET_COPY_OUT_VENDOR)/bin/tad_static \
     $(COMMON_PATH)/rootdir/sbin/ua-data-mounter:root/sbin/ua-data-mounter \
     $(COMMON_PATH)/rootdir/sbin/wipedata:root/sbin/wipedata
 
@@ -329,8 +395,12 @@ PRODUCT_COPY_FILES += \
 # Dalvik Tweak
 PRODUCT_TAGS += dalvik.gc.type-precise
 
-# Dalvik heap configurations
-$(call inherit-product-if-exists, frameworks/native/build/phone-xxxhdpi-3072-dalvik-heap.mk)
-
-# Call hwui memory config
-$(call inherit-product-if-exists, frameworks/native/build/phone-xxxhdpi-3072-hwui-memory.mk)
+# Dalvik heap configuration
+#
+# The old device tree referenced phone-xxxhdpi-3072-dalvik-heap.mk, which does
+# not exist on Android 10.  inherit-product-if-exists therefore silently left
+# ART at its 16 MiB fallback growth limit.  Repository parsing in F-Droid and
+# modern WebView applications then died with OutOfMemoryError.  Hinoki has a
+# 320 dpi display and 3 GiB RAM; this AOSP profile provides a 192 MiB growth
+# limit and a 512 MiB maximum heap.
+$(call inherit-product, frameworks/native/build/phone-xhdpi-2048-dalvik-heap.mk)

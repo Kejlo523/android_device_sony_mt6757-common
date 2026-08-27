@@ -28,6 +28,11 @@ on post-fs-data
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     mkdir /data/misc/wpa_supplicant 0770 wifi wifi
+    # The framework does not create this legacy MTK supplicant configuration
+    # after a clean data wipe. Without it wpa_supplicant exits with status 255.
+    copy /vendor/etc/wifi/wpa_supplicant.conf /data/misc/wifi/wpa_supplicant.conf
+    chown wifi wifi /data/misc/wifi/wpa_supplicant.conf
+    chmod 0660 /data/misc/wifi/wpa_supplicant.conf
 
 	# BT relayer mode used VCOM
     chown bluetooth bluetooth /dev/ttyGS2
@@ -37,15 +42,14 @@ on boot
 
 service mnld /vendor/bin/mnld
     class main
+    setenv LD_PRELOAD /vendor/lib/libshim_mnld_mutex.so
     user gps
     group gps inet misc sdcard_rw sdcard_r media_rw system radio
     socket mnld stream 660 gps system
 
 service wpa_supplicant /vendor/bin/hw/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
-    -I/vendor/etc/wifi/wpa_supplicant_overlay.conf -N \
-    -ip2p0 -Dnl80211 -c/data/misc/wifi/p2p_supplicant.conf -e/data/misc/wifi/entropy.bin \
-    -I/vendor/etc/wifi/p2p_supplicant_overlay.conf \
+    -I/vendor/etc/wifi/wpa_supplicant_overlay.conf \
     -O/data/misc/wifi/sockets -g@android:wpa_wlan0
     class main
     socket wpa_wlan0 dgram 660 wifi wifi
