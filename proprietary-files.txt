@@ -308,7 +308,6 @@ vendor/etc/audio_param2/VolumeGainMapUL_ParamUnitDesc.xml
 vendor/etc/audio_param2/Volume_ParamUnitDesc.xml
 
 # Offline Charging
-bin/boot_logo_updater
 bin/charge_logging
 bin/kpoc_charger
 vendor/bin/sysenv_daemon
@@ -571,7 +570,6 @@ vendor/bin/idd-logreader
 vendor/bin/iddd
 vendor/bin/taimport
 vendor/bin/ta_ccci_service
-vendor/bin/tbase_helperd
 vendor/bin/updatemiscta
 vendor/etc/iddd.conf
 vendor/lib/libta.so
@@ -616,8 +614,6 @@ vendor/lib64/libnvram_sec.so
 # Graphics
 bin/display_color_calib
 bin/ged_srv
-bin/program_binary_builder
-bin/program_binary_service
 lib/libgralloc_extra_sys.so
 lib/libgui_debug.so
 lib/libjni_pq.so
@@ -625,7 +621,6 @@ lib/libged_sys.so
 lib/libMiraVision_jni.so
 lib/libmrdump.so
 lib/libpq_cust.so
-lib/libprogrambinary.so
 lib/libui_ext_fwk.so
 lib/vendor.mediatek.hardware.pq@2.0.so
 lib64/libged_sys.so
@@ -636,7 +631,6 @@ lib64/libjni_pq.so
 lib64/libMiraVision_jni.so
 lib64/libmrdump.so
 lib64/libpq_cust.so
-lib64/libprogrambinary.so
 lib64/libui_ext_fwk.so
 lib64/vendor.mediatek.hardware.pq@2.0.so
 vendor/lib/hw/gralloc.mt6757.so
@@ -789,14 +783,12 @@ etc/init/aee_aed.rc
 etc/init/atcid.rc
 etc/init/atci_service.rc
 etc/init/audiocmdservice_atci.rc
-etc/init/bootlogoupdater.rc
 etc/init/dm_agent_binder.rc
 etc/init/em_svr.rc
 etc/init/ged_srv.rc
 etc/init/init.smime.rc
 etc/init/init.thermald.rc
 etc/init/kpoc_charger.rc
-etc/init/program_binary_service.rc
 etc/init/sn.rc
 etc/init/terserver.rc
 etc/init/thermalindicator.rc
@@ -813,7 +805,6 @@ vendor/etc/init/init.mal.rc
 vendor/etc/init/init.md_apps.rc
 vendor/etc/init/init.secd.rc
 vendor/etc/init/init.taccci.rc
-vendor/etc/init/init.tbase_helperd.rc
 vendor/etc/init/init.volte_imcb.rc
 vendor/etc/init/init.volte_stack.rc
 vendor/etc/init/init.volte_ua.rc
