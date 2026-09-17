@@ -21,7 +21,7 @@ int main(void) {
         return EXIT_FAILURE;
     }
     strcpy(address.sun_path, socket_path);
-    unlink(socket_path);
+    /* Refuse to replace a running daemon's endpoint. */
     if (bind(fd, (struct sockaddr*)&address, sizeof(address)) != 0) {
         perror("bind");
         return EXIT_FAILURE;
@@ -34,7 +34,7 @@ int main(void) {
     char fd_value[16];
     snprintf(fd_value, sizeof(fd_value), "%d", fd);
     setenv("ANDROID_SOCKET_adb_atci_socket", fd_value, 1);
-    setenv("LD_PRELOAD", "/data/local/tmp/libshim_atcid_radio.so", 1);
+    setenv("LD_PRELOAD", "/system/lib64/libshim_atcid_radio.so", 1);
     execl("/system/bin/atcid", "atcid", (char*)NULL);
     fprintf(stderr, "exec atcid: %s\n", strerror(errno));
     return EXIT_FAILURE;

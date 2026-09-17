@@ -1,5 +1,6 @@
 # Devices
-/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/TA         u:object_r:ta_block_device:s0
+/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/[Tt][Aa]   u:object_r:ta_block_device:s0
+/dev/block/by-name/[Tt][Aa]                                     u:object_r:ta_block_device:s0
 /dev/socket/qnsbsd                                               u:object_r:qns_socket:s0
 /dev/socket/secd_credmgr_sock                                    u:object_r:secd_credmgr_socket:s0
 /dev/socket/secd_devsec_sock                                     u:object_r:secd_devsec_socket:s0
@@ -9,12 +10,16 @@
 /sys/class/qns(/.*)?                                                                    u:object_r:qns_sysfs:s0
 
 # Data files
-/custom(/.*)?                         u:object_r:system_file:s0
-/nvcfg(/.*)?                          u:object_r:system_file:s0
-/nvdata(/.*)?                         u:object_r:system_file:s0
-/persist(/.*)?                        u:object_r:system_file:s0
-/protect_f(/.*)?                      u:object_r:system_file:s0
-/protect_s(/.*)?                      u:object_r:system_file:s0
+# Sony's Oreo fstab mounts these partitions at the legacy top-level paths,
+# while the imported MTK policy expects the Android P /mnt/vendor names.
+# Give the legacy mount points the same types so the modem daemons retain
+# their intended access when SELinux is enforcing.
+/custom(/.*)?                         u:object_r:custom_file:s0
+/nvcfg(/.*)?                          u:object_r:nvcfg_file:s0
+/nvdata(/.*)?                         u:object_r:nvdata_file:s0
+/persist(/.*)?                        u:object_r:persist_data_file:s0
+/protect_f(/.*)?                      u:object_r:protect_f_data_file:s0
+/protect_s(/.*)?                      u:object_r:protect_s_data_file:s0
 /idd                                  u:object_r:idd_root_dir:s0
 /idd(/.*)?                            u:object_r:idd_data_file:s0
 /idd/lost\+found(/.*)?                u:object_r:idd_lostfound_file:s0
@@ -24,7 +29,7 @@
 /rca(/.*)?                            u:object_r:idd_rca_file:s0
 
 # Binaries
-/sbin/tad_static                                   u:object_r:tad_exec:s0
+/(sbin|vendor/bin|system/vendor/bin)/tad_static    u:object_r:tad_exec:s0
 /(vendor|system/vendor)/bin/qns                    u:object_r:qns_exec:s0
 /(vendor|system/vendor)/bin/secd                   u:object_r:secd_exec:s0
 /(vendor|system/vendor)/bin/ta_qmi_service         u:object_r:ta_qmi_service_exec:s0

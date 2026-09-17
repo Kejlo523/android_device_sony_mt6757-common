@@ -1,0 +1,6 @@
+# These explicitly selected, preinstalled maintenance applications may invoke
+# the userdebug su binary.  Package-name matching keeps the root-capable domain
+# limited to the APKs bundled by the hinoki product.
+user=_app isPrivApp=true seinfo=platform name=ru.andr7e.deviceinfohw domain=su type=privapp_data_file levelFrom=user
+user=_app isPrivApp=true seinfo=platform name=com.nhellfire.kerneladiutor domain=su type=privapp_data_file levelFrom=user
+user=_app isPrivApp=true seinfo=platform name=com.duckduckgo.mobile.android domain=su type=privapp_data_file levelFrom=user

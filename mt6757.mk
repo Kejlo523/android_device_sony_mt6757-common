@@ -217,6 +217,7 @@ PRODUCT_PACKAGES += \
     libandroid_net \
     libshim_agps_ssl \
     libshim_atcid_radio \
+    libshim_camera_legacy \
     libshim_mnld_mutex \
     libshim_program_binary \
     libshim_fake_log_print \

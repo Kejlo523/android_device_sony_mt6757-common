@@ -1,0 +1,4 @@
+# Legacy Xperia XA1 binder services.
+AAL u:object_r:aal_service:s0
+DmAgent u:object_r:dm_agent_binder_service:s0
+GpuAppSpectatorService u:object_r:ged_gpu_service:s0

@@ -15,6 +15,23 @@ LOCAL_CFLAGS := -O3 -Wno-unused-variable -Wno-unused-parameter
 LOCAL_PROPRIETARY_MODULE := true
 include $(BUILD_SHARED_LIBRARY)
 
+# Android 8 camera blobs expect GraphicBufferMapper and graphics HIDL helper
+# symbols that changed or became inline in Android 10.
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+    camera_legacy/camera_legacy.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+    libc++ \
+    libui
+
+LOCAL_MODULE := libshim_camera_legacy
+LOCAL_MULTILIB := 32
+LOCAL_CFLAGS := -O3
+LOCAL_PROPRIETARY_MODULE := true
+include $(BUILD_SHARED_LIBRARY)
+
 # Android 8 generated radio HIDL helpers used by the stock ATCI client.
 include $(CLEAR_VARS)
 

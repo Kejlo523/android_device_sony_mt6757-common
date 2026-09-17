@@ -100,13 +100,15 @@ BOARD_TAGS_OFFSET := 0x03f88000
 BOARD_SECOND_OFFSET := 0x00e88000
 BOARD_KERNEL_OFFSET = 0x00008000
 TARGET_KERNEL_ARCH := arm64
-# The current compatibility policy is permissive.  Without audit=0, every
-# legacy Mali/HWC ioctl is logged and keeps logd/auditd and the CPUs busy even
-# while the phone is idle.  Re-enable auditing when the policy is ready for an
-# enforcing build.
-BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 androidboot.selinux=permissive audit=0 skip_initramfs root=/dev/mmcblk0p39 rootwait ro init=/init
+# Keep SELinux enforcing with auditing enabled so any remaining legacy-vendor
+# denial can be attributed without silently bypassing policy.
+BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 audit=1 skip_initramfs root=/dev/mmcblk0p39 rootwait ro init=/init
 BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET) --ramdisk_offset $(BOARD_RAMDISK_OFFSET) --second_offset $(BOARD_SECOND_OFFSET) --tags_offset $(BOARD_TAGS_OFFSET)
 TARGET_USES_64_BIT_BINDER := true
+
+# Include the AOSP userdebug su binary for the explicitly labelled hinoki
+# maintenance applications.
+WITH_SU := true
 
 # Kernel Modules
 TARGET_KMODULES := true
@@ -151,6 +153,9 @@ BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := true
 TARGET_SYSTEM_PROP := $(COMMON_PATH)/system.prop
 
 # SELinux
+BOARD_PLAT_PUBLIC_SEPOLICY_DIR += $(COMMON_PATH)/sepolicy/mediatek/plat_public
+BOARD_PLAT_PRIVATE_SEPOLICY_DIR += $(COMMON_PATH)/sepolicy/mediatek/plat_private
+BOARD_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/mediatek/non_plat
 BOARD_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
 
 # Use dlmalloc instead of jemalloc for mallocs
@@ -178,7 +183,12 @@ TARGET_LD_SHIM_LIBS := \
 	/vendor/lib/libion_ulit.so|libutilscallstack.so \
 	/vendor/lib64/libion_ulit.so|libutilscallstack.so \
 	/vendor/lib/hw/hwcomposer.mt6757.so|libutilscallstack.so \
-	/vendor/lib64/hw/hwcomposer.mt6757.so|libutilscallstack.so
+	/vendor/lib64/hw/hwcomposer.mt6757.so|libutilscallstack.so \
+	/vendor/lib/hw/android.hardware.camera.provider@2.4-impl-mediatek.so|libutilscallstack.so \
+	/vendor/lib/libcam.client.so|libshim_camera_legacy.so \
+	/vendor/lib/android.hardware.camera.devic3@3.2.so|libshim_camera_legacy.so \
+	/vendor/bin/mtk_agpsd|libutilscallstack.so \
+	/vendor/bin/mtk_agpsd|libshim_agps_ssl.so
 
 # FS Gen
 TARGET_FS_CONFIG_GEN := \

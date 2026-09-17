@@ -1,0 +1,13 @@
+# ==============================================
+# MTK Policy Rule
+# ==============================================
+
+#allow mtk audio hidl service to read "ro.audio.usb.period_us"
+ro.audio.usb.period_us u:object_r:exported_default_prop:s0 exact int
+
+#allow adb daemon to read "persist.adb.nonblocking_ffs"
+persist.adb.nonblocking_ffs u:object_r:exported_default_prop:s0 exact int
+
+#============system fingerprint property===========
+# GOOGLE: commented out in favor of aosp/1484898
+#ro.system.build.fingerprint u:object_r:fingerprint_prop:s0 exact string

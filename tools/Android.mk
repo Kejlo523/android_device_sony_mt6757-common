@@ -18,3 +18,10 @@ LOCAL_SRC_FILES := atcid_runner.c
 LOCAL_CFLAGS := -Wall -Werror
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_EXECUTABLE)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := hinoki-atci-query
+LOCAL_SRC_FILES := atci_query.c
+LOCAL_CFLAGS := -Wall -Werror
+LOCAL_MODULE_TAGS := optional
+include $(BUILD_EXECUTABLE)

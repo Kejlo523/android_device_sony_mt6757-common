@@ -1,0 +1,258 @@
+# Xperia XA1 vendor image is based on MediaTek's Android 8 policy.  These
+# services still ship in the proprietary image but were removed or renamed in
+# the later Wembley policy used as the Android 10 baseline.  Keep each daemon
+# in its own domain so a permissive diagnostic build produces actionable AVCs
+# instead of running all of them as init.
+
+type mobicore, domain;
+type mobicore_exec, exec_type, file_type, vendor_file_type;
+type mobicore_data_file, file_type, data_file_type, core_data_file_type;
+type mobicore_registry_file, file_type, vendor_file_type;
+type mobicore_admin_device, dev_type;
+type mobicore_tui_device, dev_type;
+type mobicore_user_device, dev_type;
+init_daemon_domain(mobicore)
+allow mobicore mobicore_registry_file:dir r_dir_perms;
+allow mobicore mobicore_registry_file:file r_file_perms;
+# mcDriverDaemon's NetlinkServer creates and binds its own NETLINK_GENERIC
+# socket during cold boot.  Keep this aligned with Sony's stock XA1 policy;
+# without it the daemon exits before keymaster can register.
+allow mobicore self:netlink_socket {
+  create bind connect read write getattr setattr lock append getopt setopt shutdown
+};
+allow mobicore mobicore_admin_device:chr_file rw_file_perms;
+allowxperm mobicore mobicore_admin_device:chr_file ioctl {
+  0x4d00 0x4d01 0x4d02 0x4d03 0x4d04 0x4d05 0x4d06 0x4d07
+  0x4d08 0x4d09 0x4d0b 0x4d0c 0x4d0e 0x4d0f 0x4d10 0x4d11
+};
+allow mobicore mobicore_user_device:chr_file rw_file_perms;
+allowxperm mobicore mobicore_user_device:chr_file ioctl {
+  0x4d02 0x4d05 0x4d06 0x4d07 0x4d0b
+};
+allow mobicore mobicore_data_file:dir create_dir_perms;
+allow mobicore mobicore_data_file:file create_file_perms;
+allow mobicore mobicore_tui_device:chr_file { read open ioctl };
+
+# Trustonic clients used by the stock XA1 secure-world stack.
+allow hal_keymaster_default mobicore:unix_stream_socket { read write connectto };
+allow hal_keymaster_default mobicore_user_device:chr_file rw_file_perms;
+allowxperm hal_keymaster_default mobicore_user_device:chr_file ioctl {
+  0x4d02 0x4d05 0x4d06 0x4d07 0x4d0b
+};
+allow hal_gatekeeper_default mobicore:unix_stream_socket { read write connectto };
+allow hal_gatekeeper_default mobicore_user_device:chr_file rw_file_perms;
+allowxperm hal_gatekeeper_default mobicore_user_device:chr_file ioctl {
+  0x4d02 0x4d05 0x4d06 0x4d07 0x4d0b
+};
+allow hal_keymaster_attestation mobicore:unix_stream_socket connectto;
+allow hal_keymaster_attestation mobicore_user_device:chr_file rw_file_perms;
+allowxperm hal_keymaster_attestation mobicore_user_device:chr_file ioctl {
+  0x4d02 0x4d05 0x4d06 0x4d07 0x4d0b
+};
+allow hal_drm_widevine mobicore:unix_stream_socket connectto;
+allow hal_drm_widevine mobicore_data_file:dir search;
+allow hal_drm_widevine mobicore_data_file:file r_file_perms;
+allow hal_drm_widevine mobicore_user_device:chr_file rw_file_perms;
+allowxperm hal_drm_widevine mobicore_user_device:chr_file ioctl {
+  0x4d02 0x4d05 0x4d06 0x4d07 0x4d0b
+};
+allow hal_secd_default mobicore:unix_stream_socket connectto;
+allow hal_secd_default mobicore_user_device:chr_file rw_file_perms;
+allowxperm hal_secd_default mobicore_user_device:chr_file ioctl {
+  0x4d02 0x4d05 0x4d06 0x4d07 0x4d0b
+};
+
+type ta_ccci_service, domain;
+type ta_ccci_service_exec, exec_type, file_type, vendor_file_type;
+init_daemon_domain(ta_ccci_service)
+allow ta_ccci_service sysfs_ccci:dir search;
+allow ta_ccci_service sysfs_ccci:file r_file_perms;
+allow ta_ccci_service ccci_device:chr_file rw_file_perms;
+# The modem obtains its Sony Trim Area records through this bridge.  Giving
+# it CCCI access alone leaves every tad request failing under enforcing.
+unix_socket_connect(ta_ccci_service, tad, tad)
+
+type mtk_hal_keyinstall, domain;
+type mtk_hal_keyinstall_exec, exec_type, file_type, vendor_file_type;
+type mtk_hal_keyinstall_hwservice, hwservice_manager_type;
+init_daemon_domain(mtk_hal_keyinstall)
+hal_server_domain(mtk_hal_keyinstall, hal_keymaster)
+add_hwservice(hal_keymaster_server, mtk_hal_keyinstall_hwservice)
+allow hal_keymaster_client mtk_hal_keyinstall_hwservice:hwservice_manager find;
+allow mtk_hal_keyinstall mobicore:unix_stream_socket connectto;
+allow mtk_hal_keyinstall mobicore_data_file:dir search;
+allow mtk_hal_keyinstall mobicore_data_file:file r_file_perms;
+allow mtk_hal_keyinstall mobicore_user_device:chr_file rw_file_perms;
+allowxperm mtk_hal_keyinstall mobicore_user_device:chr_file ioctl {
+  0x4d02 0x4d05 0x4d06 0x4d07 0x4d0b
+};
+
+type hal_mtkcodecservice_default, domain;
+type hal_mtkcodecservice_default_exec, exec_type, file_type, vendor_file_type;
+type hal_mtkcodecservice_hwservice, hwservice_manager_type;
+init_daemon_domain(hal_mtkcodecservice_default)
+hal_server_domain(hal_mtkcodecservice_default, hal_mtkcodecservice)
+add_hwservice(hal_mtkcodecservice_server, hal_mtkcodecservice_hwservice)
+
+type mtkmal, domain;
+type mtkmal_exec, exec_type, file_type, vendor_file_type;
+init_daemon_domain(mtkmal)
+
+type wfca, domain;
+type wfca_exec, exec_type, file_type, vendor_file_type;
+init_daemon_domain(wfca)
+net_domain(wfca)
+allow wfca ccci_device:chr_file rw_file_perms;
+allowxperm wfca ccci_device:chr_file ioctl { 0x4301 };
+
+type epdg_wod, domain;
+type epdg_wod_exec, exec_type, file_type, vendor_file_type;
+init_daemon_domain(epdg_wod)
+net_domain(epdg_wod)
+
+# Sony's Oreo init scripts pass these named sockets to rilproxy and the
+# World-Phone/MAL daemons.  The old permissive build created them with the
+# generic socket_device label; Android 10 enforcing correctly rejects that.
+# Give each legacy endpoint a narrow label and restore the original MTK IPC
+# paths without granting access to every file below /dev/socket.
+allow init { rilproxy_atci_socket rild_mal_socket wod_action_socket wod_sim_socket }:sock_file create_file_perms;
+allow rild { rilproxy_atci_socket rild_mal_socket }:sock_file rw_file_perms;
+allow epdg_wod { wod_action_socket wod_sim_socket }:sock_file rw_file_perms;
+allow mtkmal rild_mal_socket:sock_file write;
+allow mtkmal rild:unix_stream_socket connectto;
+allow mtkmal { wod_action_socket wod_sim_socket }:sock_file write;
+allow mtkmal epdg_wod:unix_stream_socket connectto;
+
+# The framework uses the Oreo ATCI daemon for the supported signal-reporting
+# path.  Init must create its labelled socket, and its explicitly configured
+# ABI compatibility preload must survive the init -> atcid transition.
+allow init adb_atci_socket:sock_file create_file_perms;
+allow init atcid:process noatsecure;
+unix_socket_connect(radio, adb_atci, atcid)
+allow atcid mtkrild:unix_stream_socket connectto;
+
+type ipsec_mon, domain;
+type ipsec_mon_exec, exec_type, file_type, vendor_file_type;
+init_daemon_domain(ipsec_mon)
+allow ipsec_mon self:netlink_xfrm_socket { create_socket_perms_no_ioctl nlmsg_read };
+allow ipsec_mon self:netlink_route_socket create_socket_perms_no_ioctl;
+allow ipsec_mon self:capability net_admin;
+set_prop(ipsec_mon, ims_ipsec_prop)
+
+type sysenv_daemon, domain;
+type sysenv_daemon_exec, exec_type, file_type, vendor_file_type;
+init_daemon_domain(sysenv_daemon)
+allow sysenv_daemon self:netlink_socket create_socket_perms_no_ioctl;
+
+type wifi2agps, domain;
+type wifi2agps_exec, exec_type, file_type, vendor_file_type;
+init_daemon_domain(wifi2agps)
+net_domain(wifi2agps)
+allow wifi2agps self:netlink_generic_socket create_socket_perms_no_ioctl;
+
+type aal, domain;
+typeattribute aal coredomain;
+type aal_exec, exec_type, file_type, system_file_type;
+type aal_service, service_manager_type;
+init_daemon_domain(aal)
+binder_use(aal)
+add_service(aal, aal_service)
+allow aal graphics_device:chr_file rw_file_perms;
+
+type dm_agent_binder, domain;
+typeattribute dm_agent_binder coredomain;
+type dm_agent_binder_exec, exec_type, file_type, system_file_type;
+type dm_agent_binder_service, service_manager_type;
+init_daemon_domain(dm_agent_binder)
+binder_use(dm_agent_binder)
+add_service(dm_agent_binder, dm_agent_binder_service)
+
+type ged_srv, domain;
+typeattribute ged_srv coredomain;
+type ged_srv_exec, exec_type, file_type, system_file_type;
+type ged_gpu_service, service_manager_type;
+init_daemon_domain(ged_srv)
+binder_use(ged_srv)
+binder_call(ged_srv, mtk_hal_power)
+binder_call(ged_srv, surfaceflinger)
+binder_call(ged_srv, system_server)
+add_service(ged_srv, ged_gpu_service)
+allow ged_srv surfaceflinger_service:service_manager find;
+allow ged_srv input_service:service_manager find;
+allow ged_srv mtk_hal_power_hwservice:hwservice_manager find;
+allow system_server ged_srv:fifo_file write;
+allow ged_srv proc_ged:file rw_file_perms;
+allowxperm ged_srv proc_ged:file ioctl { proc_ged_ioctls };
+
+type led_service, domain;
+typeattribute led_service coredomain;
+type led_service_exec, exec_type, file_type, system_file_type;
+type led_service_socket, file_type;
+init_daemon_domain(led_service)
+allow led_service sysfs_leds:dir search;
+allow led_service sysfs_leds:file rw_file_perms;
+get_prop(led_service, hwservicemanager_prop)
+
+# The generic provider binary talks to the legacy camera stack through
+# vndbinder on this non-Treble device.
+vndbinder_use(hal_camera_default)
+
+# The generic 2.0 audio service loads Sony's MediaTek primary-audio module, so
+# it needs the same narrowly scoped hardware/calibration access as the MTK HAL.
+allow hal_audio_default mtk_audiohal_data_file:dir create_dir_perms;
+allow hal_audio_default mtk_audiohal_data_file:file create_file_perms;
+allow hal_audio_default ccci_device:chr_file rw_file_perms;
+allow hal_audio_default sysfs_ccci:dir search;
+allow hal_audio_default sysfs_ccci:file r_file_perms;
+allow hal_audio_default sysfs_switch:dir r_dir_perms;
+allow hal_audio_default sysfs_switch:file r_file_perms;
+allow hal_audio_default nvram_data_file:lnk_file read;
+allow hal_audio_default nvram_data_file:dir r_dir_perms;
+allow hal_audio_default nvram_data_file:file r_file_perms;
+# The generic audio service also reaches the calibration data through the
+# relabelled /nvdata mount when SELinux is enforcing.
+allow hal_audio_default nvdata_file:lnk_file read;
+allow hal_audio_default nvdata_file:dir r_dir_perms;
+allow hal_audio_default nvdata_file:file r_file_perms;
+allow hal_audio_default mtk_hal_power_hwservice:hwservice_manager find;
+
+# The stock HWC asks the MTK picture-quality HAL and the standard allocator
+# for every display composition cycle.  Denying these lookups causes a tight
+# AVC/retry loop and contributes to idle battery drain.
+allow hal_graphics_composer_default mtk_hal_pq_hwservice:hwservice_manager find;
+hal_client_domain(hal_graphics_composer_default, hal_allocator)
+
+# PackageManager scans the Trustonic registry shipped on vendor at boot.
+allow system_server mobicore_registry_file:dir r_dir_perms;
+allow system_server mobicore_registry_file:file r_file_perms;
+
+# Legacy performance initialization writes the already-labelled PPM node.
+allow vendor_init proc_ppm:file write;
+
+# init creates these two inherited sockets for wfca.
+type wfca_socket, file_type;
+allow init wfca_socket:sock_file create_file_perms;
+allow wfca wfca_socket:sock_file rw_file_perms;
+
+# The Oreo blobs still share /data/.tp. Android 10 moved this state to
+# /data/vendor/.tp, so keep a separate core-data label for the legacy path.
+allow { thermalloadalgod thermal_manager mtk_hal_audio mediacodec mtk_hal_power mtk_hal_camera } thermal_manager_legacy_data_file:dir create_dir_perms;
+allow { thermalloadalgod thermal_manager mtk_hal_audio mediacodec mtk_hal_power mtk_hal_camera } thermal_manager_legacy_data_file:file create_file_perms;
+
+type thermald, domain;
+typeattribute thermald coredomain;
+type thermald_exec, exec_type, file_type, system_file_type;
+init_daemon_domain(thermald)
+
+# Sony's existing policy declared secd_exec and its sockets but omitted the
+# process domain and transition.
+type secd, domain;
+init_daemon_domain(secd)
+unix_socket_connect(secd, tad, tad)
+allow secd mobicore:unix_stream_socket connectto;
+allow secd mobicore_data_file:dir search;
+allow secd mobicore_data_file:file r_file_perms;
+allow secd mobicore_user_device:chr_file rw_file_perms;
+allowxperm secd mobicore_user_device:chr_file ioctl {
+  0x4d02 0x4d05 0x4d06 0x4d07 0x4d0b
+};

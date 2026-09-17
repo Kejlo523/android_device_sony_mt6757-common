@@ -1,0 +1,4 @@
+# Compatibility types expected by the MediaTek Q policy but no longer declared
+# by the LineageOS 17.1 platform policy.
+type usb_prop, property_type;
+type radio_control_prop, property_type;

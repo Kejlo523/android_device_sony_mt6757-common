@@ -21,8 +21,10 @@ import ${ro.mtkrc.path}init.modem.rc
 # Queue a separate event here.  Init runs it only after every post-fs-data
 # action has finished, including the vendor setup of /nvdata and /data/nvram.
 on post-fs-data
-    # Keep an early userspace log on cache so boot failures remain readable
-    # from recovery even when adbd never becomes available.
+    # Keep a filtered early radio log across reboots.  /cache is not writable
+    # by Android's logpersist domain under enforcing SELinux; misc/logd is its
+    # policy-owned storage and remains available over adb after boot.
+    rm /data/misc/logd/hinoki-radio-boot.log
     start hinoki_bootlog
 
     # bootbridge bypasses the normal userdata preparation path. Create only
@@ -49,10 +51,10 @@ on hinoki-framework-start
     class_start main
     class_start late_start
 
-service hinoki_bootlog /system/bin/logcat -b all -v threadtime -f /cache/hinoki-boot.log
+service hinoki_bootlog /system/bin/logcat -b radio -b main -b system -v threadtime -f /data/misc/logd/hinoki-radio-boot.log -r 2048 -n 2 RILJ:V RIL:V RIL-SIM:V RILC:V RILC-MTK:V RIL-RP:V RILC-RP:V AT:V RfxRilAdapter:V RfxRoot:V RfxMainThread:V UiccController:V IccCardProxy:V SubscriptionInfoUpdater:V SST:V NRM-C:V ta_ccci_service:V tad:V tadif:V linker:W *:S
     class core
-    user root
-    group root system log readproc
+    user logd
+    group log
     disabled
 
 # The legacy Sony/MTK HAL opens the speaker PCM route but does not enable the
@@ -284,20 +286,14 @@ on post-fs-data
     symlink /nvdata /data/nvram
     mkdir /nvdata/media 0771 media audio
 
-    # Create cct mount point
-    mkdir /data/cct
-    chown root system /data/cct
-    chmod 0771 /data/cct
-
-    # Create shading_otp mount point
-    mkdir /data/shading_otp
-    chown root system /data/shading_otp
-    chmod 0771 /data/shading_otp
-
-    # Create shading mount point
-    mkdir /data/shading
-    chown root system /data/shading
-    chmod 0771 /data/shading
+    # Camera calibration data used by the legacy MTK HAL.  Pre-create it so
+    # cameraserver does not continuously retry mkdir(2) at runtime.
+    mkdir /data/cct 0770 cameraserver camera
+    mkdir /data/shading_otp 0770 cameraserver camera
+    mkdir /data/shading 0770 cameraserver camera
+    restorecon_recursive /data/cct
+    restorecon_recursive /data/shading_otp
+    restorecon_recursive /data/shading
 	
     # Set SELinux security contexts on upgrade or policy update.
     restorecon_recursive /nvdata

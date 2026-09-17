@@ -323,7 +323,6 @@ bin/font-selector-make-dir.sh
 bin/lcdc_screen_cap
 bin/mdnsd
 bin/multi-cdf-symlinker.sh
-bin/sn
 lib/libcustom_prop.so
 lib/libblas.so
 lib/libdatawasherjni_system.so
@@ -789,7 +788,6 @@ etc/init/ged_srv.rc
 etc/init/init.smime.rc
 etc/init/init.thermald.rc
 etc/init/kpoc_charger.rc
-etc/init/sn.rc
 etc/init/terserver.rc
 etc/init/thermalindicator.rc
 vendor/etc/init/aee_aedv.rc
