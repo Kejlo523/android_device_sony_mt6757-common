@@ -70,7 +70,9 @@ LOCAL_SRC_FILES := \
     agps_ssl/agps_ssl.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-    libssl
+    libssl \
+    libcrypto \
+    libdl
 
 LOCAL_MODULE := libshim_agps_ssl
 LOCAL_MULTILIB := 32

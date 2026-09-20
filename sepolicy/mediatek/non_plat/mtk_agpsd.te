@@ -12,7 +12,14 @@ type mtk_agpsd, domain;
 # ==============================================
 init_daemon_domain(mtk_agpsd)
 
+# Keep the legacy ABI preloads configured in mtk_agpsd.rc effective.
+allow init mtk_agpsd:process noatsecure;
+
 net_domain(mtk_agpsd)
+
+# Sony stores the operator/SUPL profiles on the read-only OEM partition.
+allow mtk_agpsd oemfs:dir search;
+allow mtk_agpsd oemfs:file r_file_perms;
 
 # Access channels to modem for E-CID, RRLP, and LPP
 allow mtk_agpsd agps_device:chr_file rw_file_perms;

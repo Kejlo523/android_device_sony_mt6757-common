@@ -14,6 +14,10 @@ typeattribute mnld mlstrustedsubject;
 # STOPSHIP: Permissive is not allowed. CTS violation!
 init_daemon_domain(mnld)
 
+# Preserve the service's scoped mutex compatibility preload under enforcing.
+# Otherwise the Oreo blob aborts on duplicate pthread_mutex_destroy at stop.
+allow init mnld:process noatsecure;
+
 net_domain(mnld)
 # Purpose : For communicate with AGPSD by socket
 allow mnld { agpsd_data_file agpsd_legacy_data_file }:dir create_dir_perms;

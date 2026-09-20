@@ -149,6 +149,9 @@ type wifi2agps_exec, exec_type, file_type, vendor_file_type;
 init_daemon_domain(wifi2agps)
 net_domain(wifi2agps)
 allow wifi2agps self:netlink_generic_socket create_socket_perms_no_ioctl;
+allow wifi2agps agpsd_legacy_data_file:dir search;
+allow wifi2agps agpsd_legacy_data_file:sock_file write;
+allow wifi2agps mtk_agpsd:unix_dgram_socket sendto;
 
 type aal, domain;
 typeattribute aal coredomain;

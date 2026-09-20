@@ -2,6 +2,22 @@
 # action parsed from /vendor runs in vendor_init and is forbidden from creating
 # these core data types by the Treble boundary.
 on post-fs-data
+    # Oreo GNSS blobs use these fixed core-data paths.  Create and label them
+    # before class main starts mnld, agpsd and the GNSS HAL, including after wipe.
+    mkdir /data/gps_mnl 0771 gps system
+    mkdir /data/misc/gps 0770 gps system
+    mkdir /data/mpe_mnl 0771 gps system
+    mkdir /data/mnl_flp 0771 gps system
+    mkdir /data/mnl_gfc 0771 gps system
+    mkdir /data/agps_supl 0771 gps system
+    restorecon_recursive /data/gps_mnl
+    restorecon_recursive /data/misc/gps
+    restorecon_recursive /data/mpe_mnl
+    restorecon_recursive /data/mnl_flp
+    restorecon_recursive /data/mnl_gfc
+    restorecon_recursive /data/agps_supl
+    symlink /oem/android-config/agps_profiles_conf2.xml /data/agps_supl/agps_profiles_conf2.xml
+
     mkdir /data/misc/mcRegistry 0775 system system
     mkdir /data/misc/mcRegistry/TbStorage 0775 system system
     restorecon_recursive /data/misc/mcRegistry

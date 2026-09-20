@@ -7,16 +7,7 @@ on post-fs-data
     chmod 0660 /dev/ttyMT1
     chown system system /dev/ttyMT1
 
-	# GPS
-    mkdir /data/gps_mnl 0771 gps system
-    mkdir /data/misc/gps 0770 gps system
-    mkdir /data/mnl_flp 0771 gps system
-    mkdir /data/mnl_gfc 0771 gps system
-    restorecon_recursive /data/mnl_flp
-    restorecon_recursive /data/mnl_gfc
-    chown gps system /data/mpe_mnl
-    chown gps system /data/mnl_flp
-    chown gps system /data/mnl_gfc
+	# GPS data directories are owned by init.mt6757.platform.rc.
     chown gps gps /sys/class/gpsdrv/gps/pwrctl
     chown gps gps /sys/class/gpsdrv/gps/suspend
     chown gps gps /sys/class/gpsdrv/gps/state

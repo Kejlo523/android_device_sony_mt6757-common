@@ -8,3 +8,6 @@
 binder_call(hal_audio_client, hal_audio_server)
 binder_call(hal_audio_server, hal_audio_client)
 hal_attribute_hwservice(hal_audio, hal_audio_hwservice)
+
+# The legacy audio HAL sends stream power hints to the MTK power service.
+binder_call(hal_audio_default, mtk_hal_power)
