@@ -66,12 +66,12 @@
 #/data/setkey_latest.conf u:object_r:ims_ipsec_data_file:s0
 /data/vendor/audiohal(/.*)? u:object_r:mtk_audiohal_data_file:s0
 /data/vendor/powerhal(/.*)? u:object_r:mtk_powerhal_data_file:s0
-#/data/vendor/nfc(/.*)? u:object_r:nfc_data_file:s0
+/data/vendor/nfc(/.*)? u:object_r:mtk_nfc_vendor_data_file:s0
 /data/connsyslog(/.*)?  u:object_r:consyslog_data_file:s0
 /data/vendor/stp_dump(/.*)? u:object_r:stp_dump_data_file:s0
 /data/vendor/mediadrm(/.*)?      u:object_r:mediadrm_vendor_data_file:s0
 /data/vendor/dipdebug(/.*)?    u:object_r:aee_dipdebug_vendor_file:s0
-/data/vendor/key_provisioning(/.*)?   u:object_r:key_install_data_file:s0
+/data/key_provisioning(/.*)?          u:object_r:key_install_data_file:s0
 /data/vendor/vcodec(/.*)? u:object_r:vcodec_file:s0
 
 # Misc data

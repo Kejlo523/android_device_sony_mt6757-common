@@ -1,4 +1,5 @@
 import ${ro.mtkrc.path}init.connectivity.rc
+import /init.mt6757.platform.rc
 import /vendor/etc/init/hw/init.mt6757.usb.rc
 import /vendor/etc/init/hw/init.project.rc
 import /FWUpgradeInit.rc
@@ -328,6 +329,7 @@ on post-fs-data
     # NFC
     mkdir /data/vendor/nfc 0760 nfc system
     mkdir /data/vendor/nfc/param 0760 nfc system
+    restorecon_recursive /data/vendor/nfc
 
     # Create directory for font change support
     exec u:r:font_selector_make_dir:s0 system -- /system/bin/font-selector-make-dir.sh

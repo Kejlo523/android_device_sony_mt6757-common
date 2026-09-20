@@ -1,0 +1,12 @@
+# Platform-owned data paths must be created by the platform init domain.  An
+# action parsed from /vendor runs in vendor_init and is forbidden from creating
+# these core data types by the Treble boundary.
+on post-fs-data
+    mkdir /data/misc/mcRegistry 0775 system system
+    mkdir /data/misc/mcRegistry/TbStorage 0775 system system
+    restorecon_recursive /data/misc/mcRegistry
+    mkdir /data/key_provisioning 0771 system system
+    restorecon_recursive /data/key_provisioning
+
+    # Do not let the TEE daemon race the registry directory creation.
+    start mobicore

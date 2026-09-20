@@ -316,6 +316,7 @@ PRODUCT_PACKAGES += \
     fstab.mt6757.root \
     init.connectivity.rc \
     init.modem.rc \
+    init.mt6757.platform.rc \
     init.mt6757.rc \
     init.mt6757.usb.rc \
     init.project.rc \

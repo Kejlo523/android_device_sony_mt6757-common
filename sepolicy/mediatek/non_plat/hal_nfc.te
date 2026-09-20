@@ -3,3 +3,9 @@
 # ==============================================
 
 allow hal_nfc st21nfc_device:chr_file { read write getattr open ioctl };
+
+# The legacy PN553 HAL keeps its vendor configuration and runtime state here.
+# Android Q moved this access to the NFC app, but this pre-Treble blob still
+# opens the files directly.
+allow hal_nfc mtk_nfc_vendor_data_file:dir create_dir_perms;
+allow hal_nfc mtk_nfc_vendor_data_file:{ file lnk_file fifo_file } create_file_perms;

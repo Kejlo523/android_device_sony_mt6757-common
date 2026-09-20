@@ -1,0 +1,4 @@
+# The legacy Trustonic Gatekeeper HAL stores secure-user records itself.
+# AOSP grants this access to gatekeeperd, but not to an out-of-process HAL.
+allow hal_gatekeeper_default gatekeeper_data_file:dir rw_dir_perms;
+allow hal_gatekeeper_default gatekeeper_data_file:file create_file_perms;

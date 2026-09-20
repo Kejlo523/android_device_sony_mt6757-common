@@ -121,4 +121,10 @@ applications that come with the platform
         <permission name="android.permission.READ_PRECISE_PHONE_STATE"/>
     </privapp-permissions>
 
+    <!-- Recent Play services use ContextHub from the privileged location
+         process.  Without this grant it crashes and restarts continuously. -->
+    <privapp-permissions package="com.google.android.gms">
+        <permission name="android.permission.LOCATION_HARDWARE"/>
+    </privapp-permissions>
+
 </permissions>

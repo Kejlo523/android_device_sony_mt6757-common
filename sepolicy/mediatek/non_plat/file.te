@@ -268,6 +268,7 @@ type debugfs_kmemleak, fs_type, debugfs_type;
 type sf_bqdump_data_file, file_type, data_file_type, core_data_file_type;
 type nfc_socket, file_type, data_file_type, core_data_file_type;
 type vendor_nfc_socket, file_type, data_file_type;
+type mtk_nfc_vendor_data_file, file_type, data_file_type;
 # factory data file
 type factory_data_file, file_type, data_file_type, core_data_file_type;
 # Modem Log folder
@@ -372,7 +373,7 @@ type sysfs_dis_nafg, fs_type, sysfs_type;
 
 # drm key manager
 type provision_file, file_type, data_file_type;
-type key_install_data_file, file_type, data_file_type;
+type key_install_data_file, file_type, data_file_type, core_data_file_type;
 
 # Date : WK18.16
 # Purpose: Android Migration

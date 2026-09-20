@@ -1,4 +1,5 @@
 # Devices
+/dev/pn553                                                       u:object_r:nfc_device:s0
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/[Tt][Aa]   u:object_r:ta_block_device:s0
 /dev/block/by-name/[Tt][Aa]                                     u:object_r:ta_block_device:s0
 /dev/socket/qnsbsd                                               u:object_r:qns_socket:s0
