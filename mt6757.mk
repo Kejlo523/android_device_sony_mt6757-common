@@ -314,6 +314,7 @@ PRODUCT_PACKAGES += \
     fstab.enableswap \
     fstab.mt6757 \
     fstab.mt6757.root \
+    fstab.mt6757.first_stage \
     init.connectivity.rc \
     init.modem.rc \
     init.mt6757.platform.rc \

@@ -126,7 +126,8 @@
 
     <!-- When true use the linux /dev/input/event subsystem to detect the switch changes
          on the headphone/microphone jack. When false use the older uevent framework. -->
-    <bool name="config_useDevInputEventForAudioJack">false</bool>
+    <!-- MT6757 ACCDET reports EV_SW through /dev/input; there is no h2w switch. -->
+    <bool name="config_useDevInputEventForAudioJack">true</bool>
 
     <!-- Enable doze mode
          ComponentName of a dream to show whenever the system would otherwise have

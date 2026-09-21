@@ -102,7 +102,7 @@ BOARD_KERNEL_OFFSET = 0x00008000
 TARGET_KERNEL_ARCH := arm64
 # Keep SELinux enforcing with auditing enabled so any remaining legacy-vendor
 # denial can be attributed without silently bypassing policy.
-BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 audit=1 skip_initramfs root=/dev/mmcblk0p39 rootwait ro init=/init
+BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2 audit=1
 BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET) --ramdisk_offset $(BOARD_RAMDISK_OFFSET) --second_offset $(BOARD_SECOND_OFFSET) --tags_offset $(BOARD_TAGS_OFFSET)
 TARGET_USES_64_BIT_BINDER := true
 
@@ -128,6 +128,9 @@ BOARD_CACHEIMAGE_PARTITION_SIZE := 209715200
 BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 5788139520
 BOARD_BUILD_SYSTEM_ROOT_IMAGE := true
+# Keep the existing SAR system layout, but enter it through Android's static
+# first-stage init. A real boot ramdisk allows normal Magisk boot installation.
+BOARD_BOOT_RAMDISK_WITH_SYSTEM_ROOT := true
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 24536678400
 BOARD_FLASH_BLOCK_SIZE := 131072
